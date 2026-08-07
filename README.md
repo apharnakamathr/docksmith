@@ -1,4 +1,4 @@
-# Docksmith — Container Image Store
+# Docksmith - Container Image Store
 
 A lightweight, Docker-compatible-in-spirit container image store written in
 Go. Docksmith manages content-addressable image manifests (SHA-256
@@ -59,7 +59,7 @@ small, readable codebase.
 go build -o docksmith ./cmd/docksmith
 ```
 
-Requires Go 1.22+. No third-party dependencies — the whole thing is
+Requires Go 1.22+. No third-party dependencies, the whole thing is
 standard library only (`archive/tar`, `compress/gzip`, `crypto/sha256`,
 `encoding/json`).
 
@@ -106,23 +106,29 @@ The test suite (`internal/store/store_test.go`) covers:
 - that deleting one tag never garbage-collects blobs still shared by
   another tag (content-addressing dedup).
 
-## Design notes
+## Important notes
 
 - **Why a manual reference-count scan on delete instead of a live
-  refcount index?** It's the simplest thing that's obviously correct for
+  refcount index?** 
+  
+  It's the simplest thing that's obviously correct for
   a local, single-node store: `DeleteImage` re-scans `manifests/` to check
   whether any other manifest still needs a given blob before removing it.
   A production registry would maintain a live refcount instead of
   rescanning on every delete, but for a store of this size that tradeoff
   isn't worth the extra bookkeeping.
-- **Why self-healing cache lookups?** `blobPath`/`manifestPath` check the
+- **Why self-healing cache lookups?** 
+   
+   `blobPath`/`manifestPath` check the
   cache first, but fall back to a direct disk-presence check if the cache
-  misses — and if the blob genuinely is there, they repopulate the cache
+  misses and if the blob genuinely is there, they repopulate the cache
   entry instead of erroring. This means the index can be deleted or go
   stale without corrupting the store; it's a cache, not the source of
   truth.
 - **Why re-verify digests on load instead of just trusting the
-  manifest?** A manifest is just a claim about what a blob's digest and
+  manifest?** 
+  
+  A manifest is just a claim about what a blob's digest and
   size *should* be. `LoadImage` treats that claim as untrusted input:
   every blob is re-hashed as it's read out of the archive, and any
   mismatch aborts the whole load before anything touches the destination
